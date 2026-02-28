@@ -1,0 +1,73 @@
+:root {
+    --green-fg: #00bf00;
+    --dark-bg: #1c1b1b;
+}
+
+* {
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.flex-row, .flex-col {
+    display: flex;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dark-bg);
+    color: var(--green-fg);
+}
+
+.box {
+    font-size: 2.5vmin;
+    padding: 6px;
+    margin: 6px;
+    outline: 2px solid var(--green-fg);
+    border-radius: 6px;
+    color: var(--green-fg);
+    background-color: var(--dark-bg);
+}
+
+button {
+    font-size: 2.5vmin;
+    margin: 2px;
+    padding: 2px;
+    outline: 2px solid var(--green-fg);
+    border-radius: 4px;
+    color: var(--green-fg);
+    background-color: var(--dark-bg);
+}
+
+.title {
+    font-size: 3vmin;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.hover-invert:hover {
+    background-color: var(--green-fg);
+    color: var(--dark-bg);
+}
+
+.left-border {
+    border-left: 2px solid var(--green-fg);
+    padding-left: 6px;
+    margin-left: 6px;
+}
