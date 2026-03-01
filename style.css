@@ -106,12 +106,8 @@ input {
     height: 50%;
 }
 
-.red {
+.red * {
     border-color: #ff0000;
     color: #ff0000;
-}
-.yellow {
-    border-color: #ffb600;
-    color: #ffb600;
 }
 
