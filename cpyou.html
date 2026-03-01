@@ -9,7 +9,118 @@
 </head>
 <body>
     <div class="flex-row box title">
-        <span>RIP<span class="left-border">0x<input type="text" id="rip"></span></span><span class="left-border" id="instruction">mov rdi, rdx</span>
+        <span>RIP<span class="left-border">0x<input type="text" id="rip" maxlength="16"></span></span><span class="left-border" id="instruction">mov rdi, rdx</span>
     </div>
+    <div class="flex-row">
+        <div class="box flex-grow flex-col">
+            <div class="title bottom-border">Registers</div>
+            <span>RAX<span class="left-border">0x<input type="text" id="rax" class="register-input" maxlength="16"></span></span>
+            <span>RDI<span class="left-border">0x<input type="text" id="rdi" class="register-input" maxlength="16"></span></span>
+            <span>RSI<span class="left-border">0x<input type="text" id="rsi" class="register-input" maxlength="16"></span></span>
+            <span>RCX<span class="left-border">0x<input type="text" id="rcx" class="register-input" maxlength="16"></span></span>
+            <span>RDX<span class="left-border">0x<input type="text" id="rdx" class="register-input" maxlength="16"></span></span>
+            <span>R8 <span class="left-border">0x<input type="text" id="r8" class="register-input" maxlength="16"></span></span>
+            <span>R9 <span class="left-border">0x<input type="text" id="r9" class="register-input" maxlength="16"></span></span>
+            <span>R10<span class="left-border">0x<input type="text" id="r10" class="register-input" maxlength="16"></span></span>
+        </div>
+        <div class="box flex-grow flex-col">
+            <div class="title bottom-border">Memory</div>
+            <span>0x<span id="pointer1">0000000000000000</span><span class="left-border"><input type="text" id="memory1" class="register-input" maxlength="16"></span></span>
+            <span>0x<span id="pointer2">0000000000000000</span><span class="left-border"><input type="text" id="memory2" class="register-input" maxlength="16"></span></span>
+            <span>0x<span id="pointer3">0000000000000000</span><span class="left-border"><input type="text" id="memory3" class="register-input" maxlength="16"></span></span>
+            <span>0x<span id="pointer4">0000000000000000</span><span class="left-border"><input type="text" id="memory4" class="register-input" maxlength="16"></span></span>
+            <span>0x<span id="pointer5">0000000000000000</span><span class="left-border"><input type="text" id="memory5" class="register-input" maxlength="16"></span></span>
+            <span>0x<span id="pointer6">0000000000000000</span><span class="left-border"><input type="text" id="memory6" class="register-input" maxlength="16"></span></span>
+            <span>0x<span id="pointer7">0000000000000000</span><span class="left-border"><input type="text" id="memory7" class="register-input" maxlength="16"></span></span>
+            <span>0x<span id="pointer8">0000000000000000</span><span class="left-border"><input type="text" id="memory8" class="register-input" maxlength="16"></span></span>
+        </div>
+    </div>
+    <div class="flex-row flex-grow">
+        <div class="box flex-grow flex-col">
+            <div class="title bottom-border">stdout</div>
+            <div class="flex-row">
+                <div class="flex-col">
+                    <span>ptr: <span class="left-border">0x<input type="text" id="stdout-pointer" class="register-input" maxlength="16"></span></span>
+                    <span>len: <span class="left-border"><input type="number" id="stdout-length" min="0" value="0"></span></span>
+                </div>
+                <div class="box timer flex-grow hover-invert">
+                    Write
+                </div>
+            </div>
+            <div id="stdout">
+            </div>
+        </div>
+        <div class="flex-col">
+            <div class="box flex-col flex-grow">
+                <div>
+                    <div class="title bottom-border">execution timer:</div>
+                    <div class="timer" id="execution">00:00:00</div>
+                </div>
+                <div>
+                    <div class="title bottom-border">watchdog timer:</div>
+                    <div class="timer" id="watchdog">00:15:00</div>
+                </div>
+
+            </div>
+            <div class="box hover-invert">
+                <div class="timer">Next<br>Instruction</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function $(selector){
+            return document.querySelector(selector)
+        }
+
+        function register_input(event) {
+            if(event.key === "Backspace"){
+                let position = this.selectionStart;
+                if(position >= 0){
+                    this.value = this.value.substring(0, position) + "0" + this.value.substring(position);
+                    this.setSelectionRange(position, position);
+                }
+            }else if(event.key.length === 1 && !event.ctrlKey && !event.metaKey){
+                event.preventDefault();
+                event.key = event.key.toLowerCase()
+                if("0123456789abcdef".indexOf(event.key) === -1){
+                    return
+                }
+                let start = this.selectionStart;
+                let value = this.value;
+                if(start < this.maxLength){
+                    this.value = value.substring(0, start) + event.key + value.substring(start + 1);
+                    this.setSelectionRange(start + 1, start + 1);
+                }
+            }
+        }
+
+        for(let input of document.querySelectorAll(".register-input")){
+            input.value = "0000000000000000"
+            input.addEventListener("keydown", register_input)
+        }
+
+        // start of actual fucking game code
+
+        const program = [
+            "msg: 'hi', 0x0a",
+            "mov rax, 1",
+            "mov rdi, 1",
+            "mov rsi, msg",
+            "mov rdx, 3",
+            "syscall",
+            "mov rax, 60",
+            "mov rdi, 0",
+            "syscall"
+        ]
+
+        const memory_pointer_offset = (Math.random() * 2048) + 2048
+        const instruction_pointer_offset = (Math.random() * 2048) + 4096
+
+        function init_memory(){
+            for(let i = 1; i < 8; i++){
+                $(`#pointer${i}`)
+            }
+        }
+    </script>
 </body>
 </html>

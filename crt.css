@@ -3,7 +3,7 @@
         opacity: 0.27861;
     }
     5% {
-        opacity: 0.34769;
+        opacity: 0.94769;
     }
     10% {
         opacity: 0.23604;
@@ -128,7 +128,7 @@
         text-shadow: 2.6208764473832513px 0 1px rgba(0,30,255,0.5), -2.6208764473832513px 0 1px rgba(255,0,80,0.3), 0 0 3px;
     }
 }
-*::after {
+body::after {
     content: " ";
     display: block;
     position: absolute;
@@ -142,7 +142,7 @@
     pointer-events: none;
     animation: flicker 0.15s infinite;
 }
-*::before {
+body::before {
     content: " ";
     display: block;
     position: absolute;
