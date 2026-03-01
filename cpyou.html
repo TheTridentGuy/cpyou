@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="flex-row box title">
-        <span>RIP<span class="left-border">0x<input type="text" id="rip" maxlength="16"></span></span><span class="left-border" id="instruction">mov rdi, rdx</span>
+        <span>RIP<span class="left-border">0x<input type="text" id="rip" maxlength="16"></span></span><span class="left-border" id="instruction"></span>
     </div>
     <div class="flex-row">
         <div class="box flex-grow flex-col">
@@ -25,6 +25,7 @@
         </div>
         <div class="box flex-grow flex-col">
             <div class="title bottom-border">Memory</div>
+            <span>0x<span id="pointer0">0000000000000000</span><span class="left-border"><input type="text" id="memory0" class="register-input" maxlength="16"></span></span>
             <span>0x<span id="pointer1">0000000000000000</span><span class="left-border"><input type="text" id="memory1" class="register-input" maxlength="16"></span></span>
             <span>0x<span id="pointer2">0000000000000000</span><span class="left-border"><input type="text" id="memory2" class="register-input" maxlength="16"></span></span>
             <span>0x<span id="pointer3">0000000000000000</span><span class="left-border"><input type="text" id="memory3" class="register-input" maxlength="16"></span></span>
@@ -32,18 +33,17 @@
             <span>0x<span id="pointer5">0000000000000000</span><span class="left-border"><input type="text" id="memory5" class="register-input" maxlength="16"></span></span>
             <span>0x<span id="pointer6">0000000000000000</span><span class="left-border"><input type="text" id="memory6" class="register-input" maxlength="16"></span></span>
             <span>0x<span id="pointer7">0000000000000000</span><span class="left-border"><input type="text" id="memory7" class="register-input" maxlength="16"></span></span>
-            <span>0x<span id="pointer8">0000000000000000</span><span class="left-border"><input type="text" id="memory8" class="register-input" maxlength="16"></span></span>
         </div>
     </div>
     <div class="flex-row flex-grow">
         <div class="box flex-grow flex-col">
             <div class="title bottom-border">stdout</div>
-            <div class="flex-row">
+            <div class="flex-row bottom-border">
                 <div class="flex-col">
                     <span>ptr: <span class="left-border">0x<input type="text" id="stdout-pointer" class="register-input" maxlength="16"></span></span>
                     <span>len: <span class="left-border"><input type="number" id="stdout-length" min="0" value="0"></span></span>
                 </div>
-                <div class="box timer flex-grow hover-invert">
+                <div class="box timer flex-grow hover-invert" onclick="stdout_write()">
                     Write
                 </div>
             </div>
@@ -62,7 +62,11 @@
                 </div>
 
             </div>
-            <div class="box hover-invert">
+            <div class="box">
+                <span>code: <span class="left-border"><input type="number" id="code" min="0" value="0"></span></span>
+                <div class="box timer hover-invert">exit</div>
+            </div>
+            <div class="box hover-invert" onclick="next_instruction()">
                 <div class="timer">Next<br>Instruction</div>
             </div>
         </div>
@@ -113,13 +117,69 @@
             "syscall"
         ]
 
-        const memory_pointer_offset = (Math.random() * 2048) + 2048
-        const instruction_pointer_offset = (Math.random() * 2048) + 4096
+        const MEMORY_POINTER_OFFSET = Math.floor(Math.random() * 2048) + 2048
+        const INSTRUCTION_POINTER_OFFSET = Math.floor(Math.random() * 2048) + 4096
+        let instruction_pointer = 0
+        let execution_time_secs = 0
+        let execution_time_fractional_secs = 0
+        const WATCHDOG_TIME = 60
+        let watchdog_time_secs = WATCHDOG_TIME
+        let watchdog_time_fractional_secs = 0
+        let timer_interval
+        let stdout_log = ""
 
-        function init_memory(){
-            for(let i = 1; i < 8; i++){
-                $(`#pointer${i}`)
+        for(let i = 0; i <= 7; i++){
+            $(`#pointer${i}`).innerText = (MEMORY_POINTER_OFFSET+(i*8)).toString(16).padStart(16, "0");
+        }
+
+        $("#instruction").innerText = program[instruction_pointer]
+        $("#rip").value = (INSTRUCTION_POINTER_OFFSET+instruction_pointer).toString(16).padStart(16, "0")
+
+        function update_timers(){
+            if(execution_time_fractional_secs < 59){
+                execution_time_fractional_secs += 1
+            }else{
+                execution_time_fractional_secs = 0
+                execution_time_secs += 1
             }
+            $("#execution").innerText = `${execution_time_secs.toString().padStart(2, "0")}:${execution_time_fractional_secs.toString().padStart(2, "0")}`
+            if(watchdog_time_fractional_secs > 0){
+                watchdog_time_fractional_secs -= 1
+            }else{
+                watchdog_time_fractional_secs = 59
+                watchdog_time_secs -= 1
+            }
+            $("#watchdog").innerText = `${watchdog_time_secs.toString().padStart(2, "0")}:${watchdog_time_fractional_secs.toString().padStart(2, "0")}`
+        }
+
+        function main(){
+            timer_interval = setInterval(update_timers, 10)
+        }
+
+        main()
+
+        function next_instruction(){
+            instruction_pointer += 1
+            if(instruction_pointer === program.length){
+                alert("SIGSEGV 139")
+                return
+            }
+            $("#instruction").innerText = program[instruction_pointer]
+        }
+
+        function stdout_write(){
+            console.log("here")
+            let write_length = $("#stdout-length").value
+            let write_memory = parseInt($("#stdout-pointer").value, 16) - MEMORY_POINTER_OFFSET
+            if(write_memory < 0 || (write_memory+parseInt(write_length)) > 64){
+                alert("segfault")
+                return
+            }
+            let all_memory = ""
+            for(let i=0; i<=7; i++){
+                all_memory += $(`#memory${i}`).value
+            }
+            console.log(all_memory)
         }
     </script>
 </body>

@@ -4,6 +4,7 @@
 }
 
 * {
+    user-select: none;
     font-family: monospace;
     font-weight: bold;
     caret: var(--green-fg) block;
